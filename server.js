@@ -13,8 +13,9 @@ const GATEWAY = process.env.GRAPH_GATEWAY || 'https://gateway.thegraph.com/api';
 const GT_BASE = process.env.GT_BASE || 'https://api.geckoterminal.com/api/v2';
 const DAY = 86400;
 
-// Chave da The Graph: variável de ambiente GRAPH_API_KEY, config.json (fora do git) ou campo na interface.
-// Não fica no código: no VPS vem de /etc/topcatscreener.env (criado pelo deploy-vps.sh).
+// Chave da The Graph: variável de ambiente GRAPH_API_KEY, config.json, campo na interface,
+// ou esta chave de testes incluída (gratuita, para qualquer pessoa poder experimentar).
+const DEFAULT_GRAPH_KEY = '55cb695032e8120ed2bda38ab2b631b8';
 let CONFIG_KEY = process.env.GRAPH_API_KEY || '';
 let ACCESS_PASSWORD = process.env.ACCESS_PASSWORD || '';
 try {
@@ -22,6 +23,7 @@ try {
   if (!CONFIG_KEY && cfg.GRAPH_API_KEY) CONFIG_KEY = cfg.GRAPH_API_KEY;
   if (!ACCESS_PASSWORD && cfg.ACCESS_PASSWORD) ACCESS_PASSWORD = cfg.ACCESS_PASSWORD;
 } catch (_) {}
+if (!CONFIG_KEY) CONFIG_KEY = DEFAULT_GRAPH_KEY;
 
 // Acesso externo: palavra-passe (HTTP Basic, qualquer utilizador) e no máximo 2 pesquisas em simultâneo.
 const crypto = require('crypto');
@@ -1336,7 +1338,7 @@ function preSort(cands, f, get) {
 // ───────────────────────── Site público: limites por visitante e cache ─────────────────────────
 // TRUST_PROXY=1 quando a app está atrás do Caddy/Cloudflare (o IP real vem nos cabeçalhos).
 const TRUST_PROXY = process.env.TRUST_PROXY === '1';
-const LIMITS = { scan: Number(process.env.RATE_SCANS_HOUR ?? 0), token: Number(process.env.RATE_LOOKUPS_HOUR ?? 0) }; // 0 = sem limite
+const LIMITS = { scan: Number(process.env.RATE_SCANS_HOUR ?? 0), token: Number(process.env.RATE_LOOKUPS_HOUR ?? 0), proxy: Number(process.env.RATE_PROXY_HOUR ?? 3000) }; // 0 = sem limite
 const SCAN_CACHE_MS = Number(process.env.SCAN_CACHE_MIN ?? 10) * 60 * 1000;
 const hits = new Map();
 function clientIp(req) {
@@ -1565,6 +1567,45 @@ async function handleScan(req, res) {
 // Caminho base (ex.: BASE_PATH=/screener para servir em https://dominio/screener/). Vazio = raiz.
 const BASE_PATH = String(process.env.BASE_PATH || '').replace(/\/+$/, '');
 
+// ── Reencaminhamento para a versão do GitHub Pages ──
+// No GitHub Pages as pesquisas correm no navegador. Se uma API não aceitar pedidos vindos de outro site (CORS),
+// o navegador passa por aqui. Só reencaminha para estas APIs (não é um proxy aberto) e só para os sites autorizados.
+const PROXY_HOSTS = ['gateway.thegraph.com', 'api.geckoterminal.com', 'api.gopluslabs.io', 'api.coingecko.com']
+  .concat(String(process.env.PROXY_EXTRA_HOSTS || '').split(',').map((x) => x.trim()).filter(Boolean));
+const PROXY_SUFFIX = ['.publicnode.com'];
+const PROXY_ORIGINS = String(process.env.PROXY_ORIGINS || 'https://topcatmasterinvestor.github.io,https://topcatlabs.com,https://www.topcatlabs.com')
+  .split(',').map((x) => x.trim()).filter(Boolean);
+function proxyAllowed(u) {
+  let x; try { x = new URL(u); } catch (_) { return null; }
+  const h = x.hostname.toLowerCase();
+  const local = PROXY_HOSTS.includes(h) && /^(localhost|127\.0\.0\.1)$/.test(h);
+  if (x.protocol !== 'https:' && !local) return null;
+  if (!PROXY_HOSTS.includes(h) && !PROXY_SUFFIX.some((s) => h.endsWith(s))) return null;
+  return x;
+}
+async function handleProxy(req, res) {
+  const origin = String(req.headers.origin || '');
+  const okOrigin = PROXY_ORIGINS.includes('*') || PROXY_ORIGINS.includes(origin);
+  const cors = okOrigin ? { 'access-control-allow-origin': origin || '*', 'access-control-allow-methods': 'GET, POST, OPTIONS',
+    'access-control-allow-headers': 'content-type, accept, x-cg-demo-api-key', 'access-control-max-age': '86400', vary: 'Origin' } : {};
+  if (!okOrigin) { res.writeHead(403, { 'content-type': 'application/json' }); return res.end('{"error":"origin not allowed"}'); }
+  if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }
+  const target = proxyAllowed(new URL(req.url, 'http://x').searchParams.get('u') || '');
+  if (!target) { res.writeHead(403, { ...cors, 'content-type': 'application/json' }); return res.end('{"error":"destination not allowed"}'); }
+  const lim = rateCheck(req, 'proxy');
+  if (lim) { res.writeHead(429, { ...cors, 'content-type': 'application/json' }); return res.end('{"error":"too many requests"}'); }
+  let body = ''; let size = 0;
+  for await (const c of req) { size += c.length; if (size > 1024 * 1024) { res.writeHead(413, cors); return res.end(); } body += c; }
+  const headers = {};
+  for (const h of ['content-type', 'accept', 'x-cg-demo-api-key']) if (req.headers[h]) headers[h] = req.headers[h];
+  let up;
+  try { up = await fetch(target.href, { method: req.method === 'POST' ? 'POST' : 'GET', headers, body: req.method === 'POST' ? body : undefined, signal: AbortSignal.timeout(30000) }); }
+  catch (e) { res.writeHead(502, { ...cors, 'content-type': 'application/json' }); return res.end(JSON.stringify({ error: 'upstream unreachable' })); }
+  const buf = Buffer.from(await up.arrayBuffer());
+  res.writeHead(up.status, { ...cors, 'content-type': up.headers.get('content-type') || 'application/json' });
+  res.end(buf);
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     if (BASE_PATH) {
@@ -1575,6 +1616,7 @@ const server = http.createServer(async (req, res) => {
       if (!req.url.startsWith(BASE_PATH + '/')) { res.writeHead(404); return res.end('not found'); }
       req.url = req.url.slice(BASE_PATH.length) || '/';
     }
+    if (req.url.startsWith('/api/proxy')) return await handleProxy(req, res);   // antes da palavra-passe: usado pelo GitHub Pages
     if (!authorized(req)) {
       res.writeHead(401, { 'www-authenticate': 'Basic realm="TopCat Screener", charset="UTF-8"', 'content-type': 'text/plain; charset=utf-8' });
       return res.end(tr('en', 'pass'));

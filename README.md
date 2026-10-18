@@ -60,7 +60,7 @@ node server.js
 
 Abre http://localhost:3000.
 
-A chave da The Graph **não** está no código. Define-a na variável `GRAPH_API_KEY`, num `config.json` com `{ "GRAPH_API_KEY": "..." }` (ignorado pelo git), ou no campo **Chave da The Graph** na interface. No VPS, a primeira instalação é `GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh topcatlabs.com`; a chave fica guardada em `/etc/topcatscreener.env` (só o root lê) e as atualizações seguintes já não a pedem.
+O código inclui uma chave de testes da The Graph, para qualquer pessoa poder experimentar sem configurar nada. Para usar a tua: variável `GRAPH_API_KEY`, um `config.json` com `{ "GRAPH_API_KEY": "..." }` (ignorado pelo git), ou o campo **Chave da The Graph** na interface. No VPS: `GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh topcatlabs.com` (fica guardada em `/etc/topcatscreener.env`).
 
 ## De onde vêm os dados
 
@@ -129,3 +129,13 @@ O `deploy-vps.sh` publica tudo no mesmo domínio:
 | `/swap/relay` | Relay dos bundles do Swap (só aceita pedidos de topcatlabs.com) |
 
 Cada vez que corres o script, o Swap é atualizado para a versão mais recente do GitHub.
+
+## GitHub Pages (sem servidor)
+
+O Screener também corre como site estático: **https://topcatmasterinvestor.github.io/topcatscreener/**
+
+- `node tools/build-web.js` cria `dist-web/`: o mesmo `server.js` corre dentro do navegador e as pesquisas vão diretamente do computador de cada visitante para a The Graph, o GeckoTerminal, o GoPlus e o CoinGecko (os limites por minuto passam a ser de cada visitante).
+- O workflow `.github/workflows/pages.yml` publica-o a cada `git push`. Ativa em **Settings › Pages › Source: GitHub Actions**.
+- Usa a chave de testes incluída no código. Para outra, cria o secret **GRAPH_API_KEY** (Settings › Secrets and variables › Actions); o workflow usa-a no lugar da de testes.
+- Para experimentar no teu computador: `node tools/build-web.js && python3 -m http.server 8080 -d dist-web` → http://localhost:8080
+

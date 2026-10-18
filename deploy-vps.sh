@@ -31,17 +31,12 @@ SCAN_CACHE_MIN="${SCAN_CACHE_MIN:-10}"
 #   COINGECKO_API_KEY=CG-xxxx bash deploy-vps.sh topcatlabs.com
 COINGECKO_API_KEY="${COINGECKO_API_KEY:-$(sed -n 's/^Environment=COINGECKO_API_KEY=//p' /etc/systemd/system/topcatscreener.service 2>/dev/null | head -1)}"
 
-# Chaves secretas: ficam em /etc/topcatscreener.env (só o root lê), nunca no código nem no GitHub.
-# 1.ª vez:  GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh topcatlabs.com   (depois fica guardada)
+# Chaves opcionais: ficam em /etc/topcatscreener.env (só o root lê). Sem GRAPH_API_KEY, usa a chave de testes do código.
+# Para usar outra:  GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh topcatlabs.com   (depois fica guardada)
 ENV_FILE=/etc/topcatscreener.env
 envget() { sed -n "s/^$1=//p" "$ENV_FILE" 2>/dev/null | head -1; }
 GRAPH_API_KEY="${GRAPH_API_KEY:-$(envget GRAPH_API_KEY)}"
 COINGECKO_API_KEY="${COINGECKO_API_KEY:-$(envget COINGECKO_API_KEY)}"
-if [ -z "$GRAPH_API_KEY" ]; then
-  echo "!! Falta a chave da The Graph. Corre uma vez assim:"
-  echo "   GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh $DOMAIN"
-  exit 1
-fi
 umask 077
 printf 'GRAPH_API_KEY=%s\nCOINGECKO_API_KEY=%s\n' "$GRAPH_API_KEY" "$COINGECKO_API_KEY" > "$ENV_FILE"
 chmod 600 "$ENV_FILE"; umask 022
