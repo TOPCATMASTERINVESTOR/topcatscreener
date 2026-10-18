@@ -208,6 +208,10 @@ td.c-risk{min-width:250px}
 .note{font-size:12px;color:var(--muted);margin-top:14px;line-height:1.5}
 .liqc{display:inline-flex;align-items:center;gap:8px;justify-content:flex-end}
 .lpgrp{display:inline-flex;align-items:center;gap:4px}
+.lplink{color:inherit;border-radius:6px;padding:2px 3px;margin:-2px -3px}
+.lplink:hover{background:var(--panel2);text-decoration:none}
+.lplink:hover .lpie{transform:scale(1.15)}
+.lpie{transition:transform .12s}
 .lpp{font:600 11px/1 var(--mono);min-width:30px;text-align:left;white-space:nowrap}
 .lpie{flex:none;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:conic-gradient(var(--c) var(--p),rgba(147,166,194,.18) 0);box-shadow:inset 0 0 0 1.5px var(--c);font:700 10px/1 var(--sans);color:var(--muted)}
 .lpie.lp-red{background:conic-gradient(var(--c) var(--p),rgba(255,91,110,.22) 0)}
@@ -725,6 +729,11 @@ function lpLevel(r){
   if(!r.lp) return 'none';
   return r.lp.pct>30 ? 'green' : r.lp.pct>=5 ? 'yellow' : 'orange';
 }
+// Clicar no círculo abre o mapa de liquidez (pools V3/V4) numa tab nova — só nas chains EVM da The Graph
+function liqLink(r){
+  const c=CFG.chains[r.chain]; if(!c || !c.versions || !c.versions.length || r.cex || !/^0x[0-9a-fA-F]{40}$/.test(String(r.address))) return null;
+  return 'liq.html?'+new URLSearchParams({chain:r.chain, address:r.address, sym:r.symbol||'', price:String(r.price||''), lang:LANG}).toString();
+}
 function lpPie(r){
   const lv=lpLevel(r), p=r.lp?Math.max(0,Math.min(100,r.lp.pct)):0;
   // círculo + % queimada/bloqueada ao lado (na mesma cor)
@@ -762,7 +771,8 @@ const COLS = [
   { k:'avgVol', g:'g_main', lk:'c_avgVol', cell:r=>money(r.avgVol), csv:[['avg_daily_volume_7d_usd',r=>r.avgVol.toFixed(2)]] },
   { k:'liq',    g:'g_main', lk:'c_liq', field:'liquidity', labelFn:()=>t('c_liq')+' '+liqTag(),
     title:r=>r.cex?t('cex_liq'):[lpTitle(r), String(r.sources).startsWith('GeckoTerminal')?t('liq_gecko'):t('liq_uni',{v:r.sources.replace(/Uniswap /g,'')})].filter(Boolean).join('\n'),
-    cell:r=>r.cex?`<span class="dim">CEX</span>`:`<span class="liqc">${lpPie(r)}<span>${money(r.liquidity)}</span></span>`,
+    cell:r=>{ if(r.cex) return `<span class="dim">CEX</span>`; const u=liqLink(r);
+      return `<span class="liqc">${u?`<a class="lplink" href="${esc(u)}" target="_blank" rel="noopener" title="${esc(t('lp_open'))}">${lpPie(r)}</a>`:lpPie(r)}<span>${money(r.liquidity)}</span></span>`; },
     csv:[['liquidity_usd',r=>r.liquidity!=null?r.liquidity.toFixed(2):''],['lp_burned_locked_pct',r=>r.lp?r.lp.pct.toFixed(1):''],['lp_check',r=>r.lp?r.lp.src:'']] },
   { k:'vol24h', g:'g_main', lk:'c_vol24', field:'vol24h', cell:r=>money(r.vol24h), csv:[['volume_24h_usd',r=>r.vol24h!=null?r.vol24h.toFixed(2):'']] },
   { k:'ath',    g:'g_main', lk:'c_ath', title:r=>r.athPartial?t('ath_partial'):'', cell:r=>(r.athPartial?'≥ ':'')+price(r.ath), csv:[['ath_usd',r=>r.ath]] },

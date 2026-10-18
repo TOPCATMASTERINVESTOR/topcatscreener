@@ -96,8 +96,8 @@ ${server}
   const nativeFetch = window.fetch.bind(window);
   window.fetch = (input, init) => {
     const u = typeof input === 'string' ? input : (input && input.url) || '';
-    const m = u.match(/(?:^|\\/)api\\/(scan|token|config|networks)(?:\\?.*)?$/);
-    if (m && HANDLER && !/^[a-z]+:\\/\\//i.test(u)) return local('/api/' + m[1], init);   // só os caminhos relativos da própria página
+    const m = u.match(/(?:^|\\/)api\\/(scan|token|config|networks|liqmap)(\\?.*)?$/);
+    if (m && HANDLER && !/^[a-z]+:\\/\\//i.test(u)) return local('/api/' + m[1] + (m[2] || ''), init);   // só os caminhos relativos da própria página
     return nativeFetch(input, init);
   };
   window.TOPCAT_STATIC = true;
@@ -120,6 +120,11 @@ if (!html.includes('<script src="i18n.js"></script>')) throw new Error('index.ht
 html = html.replace('<script src="i18n.js"></script>', '<script src="config.js"></script>\n<script src="engine.js"></script>\n<script src="i18n.js"></script>');
 fs.writeFileSync(path.join(OUT, 'index.html'), html);
 for (const f of ['i18n.js', 'logo.png', 'apple-touch-icon.png']) fs.copyFileSync(path.join(PUB, f), path.join(OUT, f));
+// mapa de liquidez (abre numa tab nova): também precisa do motor
+let liq = fs.readFileSync(path.join(PUB, 'liq.html'), 'utf8');
+if (!liq.includes('<script src="i18n.js"></script>')) throw new Error('liq.html: não encontrei <script src="i18n.js">');
+liq = liq.replace('<script src="i18n.js"></script>', '<script src="config.js"></script>\n<script src="engine.js"></script>\n<script src="i18n.js"></script>');
+fs.writeFileSync(path.join(OUT, 'liq.html'), liq);
 fs.writeFileSync(path.join(OUT, '.nojekyll'), '');
 
 console.log('dist-web/ criado' + (key ? ' (com chave da The Graph)' : ' (sem chave: os visitantes colam a sua)'));

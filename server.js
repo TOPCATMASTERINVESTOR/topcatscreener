@@ -213,7 +213,7 @@ const GECKO_MAX_CANDIDATES = 45;
 const SMSG = {
   en: {
     riskCheck: 'Checking scam risk (GoPlus) {d}/{n}', riskFail: 'Scam check unavailable on {chain} ({err})',
-    unavailable: '{src}: unavailable ({err})', noPools: 'no {v} pools indexed on this blockchain', noTdd: 'subgraph without daily token data', noDex: 'GeckoTerminal has no {dex} pools on this blockchain', sgBroken: 'subgraph broken at the indexers, waiting for a fix by its publisher', staleSg: 'subgraph stopped updating on {d}',
+    unavailable: '{src}: unavailable ({err})', noPools: 'no {v} pools indexed on this blockchain', noTdd: 'subgraph without daily token data', liqNoChain: 'the liquidity map is only available for Uniswap V3/V4 pools on EVM blockchains', noDex: 'GeckoTerminal has no {dex} pools on this blockchain', sgBroken: 'subgraph broken at the indexers, waiting for a fix by its publisher', staleSg: 'subgraph stopped updating on {d}',
     volTokens: '{src}: {n} tokens with volume (page {p})', noSubgraph: 'No subgraph for this blockchain responded.',
     pricesRead: '{src}: prices and supply loaded', candidates: '{n} candidates — reading daily history',
     history: '{src}: history {d}/{n}', hourly: '{src}: hourly data for {n} tokens',
@@ -228,7 +228,7 @@ const SMSG = {
   },
   es: {
     riskCheck: 'Comprobando riesgo de estafa (GoPlus) {d}/{n}', riskFail: 'Comprobación de estafas no disponible en {chain} ({err})',
-    unavailable: '{src}: no disponible ({err})', noPools: 'no hay pools {v} indexados en esta blockchain', noTdd: 'subgraph sin datos diarios de tokens', noDex: 'GeckoTerminal no tiene pools de {dex} en esta blockchain', sgBroken: 'subgraph averiado en los indexadores, a la espera de que lo corrija quien lo publica', staleSg: 'el subgraph dejó de actualizarse el {d}',
+    unavailable: '{src}: no disponible ({err})', noPools: 'no hay pools {v} indexados en esta blockchain', noTdd: 'subgraph sin datos diarios de tokens', liqNoChain: 'el mapa de liquidez solo está disponible para pools Uniswap V3/V4 en blockchains EVM', noDex: 'GeckoTerminal no tiene pools de {dex} en esta blockchain', sgBroken: 'subgraph averiado en los indexadores, a la espera de que lo corrija quien lo publica', staleSg: 'el subgraph dejó de actualizarse el {d}',
     volTokens: '{src}: {n} tokens con volumen (página {p})', noSubgraph: 'Ningún subgraph de esta blockchain respondió.',
     pricesRead: '{src}: precios y supply leídos', candidates: '{n} candidatos — leyendo el historial diario',
     history: '{src}: historial {d}/{n}', hourly: '{src}: datos por hora de {n} tokens',
@@ -243,7 +243,7 @@ const SMSG = {
   },
   ru: {
     riskCheck: 'Проверка на скам (GoPlus) {d}/{n}', riskFail: 'Проверка на скам недоступна для {chain} ({err})',
-    unavailable: '{src}: недоступен ({err})', noPools: 'в этом блокчейне нет проиндексированных пулов {v}', noTdd: 'в subgraph нет дневных данных токенов', noDex: 'в GeckoTerminal нет пулов {dex} в этом блокчейне', sgBroken: 'subgraph сломан у индексаторов, ждём исправления от издателя', staleSg: 'subgraph перестал обновляться {d}',
+    unavailable: '{src}: недоступен ({err})', noPools: 'в этом блокчейне нет проиндексированных пулов {v}', noTdd: 'в subgraph нет дневных данных токенов', liqNoChain: 'карта ликвидности доступна только для пулов Uniswap V3/V4 в EVM-блокчейнах', noDex: 'в GeckoTerminal нет пулов {dex} в этом блокчейне', sgBroken: 'subgraph сломан у индексаторов, ждём исправления от издателя', staleSg: 'subgraph перестал обновляться {d}',
     volTokens: '{src}: токенов с объёмом: {n} (страница {p})', noSubgraph: 'Ни один subgraph этого блокчейна не ответил.',
     pricesRead: '{src}: цены и эмиссия загружены', candidates: 'кандидатов: {n} — читаем дневную историю',
     history: '{src}: история {d}/{n}', hourly: '{src}: почасовые данные для {n} токенов',
@@ -258,7 +258,7 @@ const SMSG = {
   },
   zh: {
     riskCheck: '正在检查诈骗风险（GoPlus）{d}/{n}', riskFail: '{chain} 暂无法进行诈骗检查（{err}）',
-    unavailable: '{src}：不可用（{err}）', noPools: '此链上没有已索引的 {v} 资金池', noTdd: 'subgraph 缺少代币日数据', noDex: 'GeckoTerminal 在此链上没有 {dex} 资金池', sgBroken: 'subgraph 在索引节点出错，等待发布者修复', staleSg: 'subgraph 已于 {d} 停止更新',
+    unavailable: '{src}：不可用（{err}）', noPools: '此链上没有已索引的 {v} 资金池', noTdd: 'subgraph 缺少代币日数据', liqNoChain: '流动性分布图仅适用于 EVM 区块链上的 Uniswap V3/V4 资金池', noDex: 'GeckoTerminal 在此链上没有 {dex} 资金池', sgBroken: 'subgraph 在索引节点出错，等待发布者修复', staleSg: 'subgraph 已于 {d} 停止更新',
     volTokens: '{src}：{n} 个有交易量的代币（第 {p} 页）', noSubgraph: '此链的 subgraph 均无响应。',
     pricesRead: '{src}：已读取价格和供应量', candidates: '{n} 个候选 — 正在读取日线历史',
     history: '{src}：历史 {d}/{n}', hourly: '{src}：{n} 个代币的小时数据',
@@ -273,7 +273,7 @@ const SMSG = {
   },
   pt: {
     riskCheck: 'A verificar risco de scam (GoPlus) {d}/{n}', riskFail: 'Verificação de scam indisponível em {chain} ({err})',
-    unavailable: '{src}: indisponível ({err})', noPools: 'não há pools {v} indexadas nesta blockchain', noTdd: 'subgraph sem dados diários de tokens', noDex: 'o GeckoTerminal não tem pools {dex} nesta blockchain', sgBroken: 'subgraph avariado nos indexadores, à espera que quem o publica o corrija', staleSg: 'o subgraph deixou de atualizar em {d}',
+    unavailable: '{src}: indisponível ({err})', noPools: 'não há pools {v} indexadas nesta blockchain', noTdd: 'subgraph sem dados diários de tokens', liqNoChain: 'o mapa de liquidez só existe para pools Uniswap V3/V4 em blockchains EVM', noDex: 'o GeckoTerminal não tem pools {dex} nesta blockchain', sgBroken: 'subgraph avariado nos indexadores, à espera que quem o publica o corrija', staleSg: 'o subgraph deixou de atualizar em {d}',
     volTokens: '{src}: {n} tokens com volume (página {p})', noSubgraph: 'Nenhum subgraph desta blockchain respondeu.',
     pricesRead: '{src}: preços e supply lidos', candidates: '{n} candidatos — a ler histórico diário',
     history: '{src}: histórico {d}/{n}', hourly: '{src}: dados horários de {n} tokens',
@@ -969,6 +969,101 @@ async function burnedPctOnChain(rpcUrl, pairs) {
   return out;
 }
 // Para as linhas finais: par V2 principal de cada token (subgraph V2) → verificação direta. Sem par V2 ou sem RPC → GoPlus / GeckoTerminal.
+// ───────────────── Mapa de liquidez por zonas de preço (pools de liquidez concentrada: Uniswap V3/V4) ─────────────────
+// 10 zonas em múltiplos do preço atual do token: < 0.2× · 4 degraus de 0.2× a 1× · 4 degraus de 1× a 10× · > 10×.
+// O 1× é uma fronteira: abaixo do preço a liquidez está no outro token (suporte de compra), acima está no próprio token (parede de venda).
+const LIQ_ZONES = (() => { const b = [0]; for (let k = 0; k <= 4; k++) b.push(0.2 * Math.pow(5, k / 4)); for (let k = 1; k <= 4; k++) b.push(Math.pow(10, k / 4)); b.push(Infinity); return b; })();
+// pool: { tokenIs0, d0, d1, sqrtPriceRaw (sqrt do preço em unidades brutas, token1/token0), ticks:[{t, net}] } ; price = preço USD do token
+function liqZones(pool, price) {
+  const { tokenIs0, d0, d1, ticks } = pool; const sc = pool.sqrtPriceRaw;
+  const usd = new Array(LIQ_ZONES.length - 1).fill(0);
+  if (!(sc > 0) || !(price > 0) || !ticks.length) return { usd, total: 0 };
+  const P0 = sc * sc * Math.pow(10, d0 - d1);                       // preço humano: token1 por token0
+  const u0 = tokenIs0 ? price : price * P0;                          // USD de 1 token0
+  const u1 = tokenIs0 ? price / P0 : price;                          // USD de 1 token1
+  const mOf = (sv) => (tokenIs0 ? (sv / sc) ** 2 : (sc / sv) ** 2);  // múltiplo do preço atual do token
+  // fronteiras no espaço sqrt(preço bruto): zonas + preço atual
+  const cuts = [sc];
+  for (const m of LIQ_ZONES) if (m > 0 && Number.isFinite(m)) cuts.push(tokenIs0 ? sc * Math.sqrt(m) : sc / Math.sqrt(m));
+  cuts.sort((a, b) => a - b);
+  const zoneOf = (m) => { for (let z = 0; z < LIQ_ZONES.length - 1; z++) if (m < LIQ_ZONES[z + 1]) return z; return LIQ_ZONES.length - 2; };
+  const sorted = ticks.slice().sort((a, b) => a.t - b.t);
+  let L = 0;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    L += sorted[i].net;
+    if (!(L > 0)) continue;
+    const sa = Math.pow(1.0001, sorted[i].t / 2), sb = Math.pow(1.0001, sorted[i + 1].t / 2);
+    const pts = [sa, ...cuts.filter((c) => c > sa && c < sb), sb];
+    for (let k = 0; k < pts.length - 1; k++) {
+      const a = pts[k], b = pts[k + 1]; if (!(b > a)) continue;
+      const v = b <= sc ? (L * (b - a)) / Math.pow(10, d1) * u1          // abaixo do preço atual (em sqrt): só token1
+        : (L * (1 / a - 1 / b)) / Math.pow(10, d0) * u0;                  // acima: só token0
+      if (Number.isFinite(v) && v > 0) usd[zoneOf(mOf(Math.sqrt(a * b)))] += v;
+    }
+  }
+  return { usd, total: usd.reduce((x, y) => x + y, 0) };
+}
+const UNI_SLUG = { ethereum: 'ethereum', base: 'base', bsc: 'bnb', arbitrum: 'arbitrum', polygon: 'polygon', optimism: 'optimism' };
+const poolFieldsCache = new Map();
+async function poolFields(key, id) {
+  if (poolFieldsCache.has(id)) return poolFieldsCache.get(id);
+  const d = await gql(key, id, '{ p: __type(name:"Pool"){ fields{ name } } t: __type(name:"Tick"){ fields{ name } } }');
+  const pf = new Set((d.p?.fields || []).map((x) => x.name)); const tf = new Set((d.t?.fields || []).map((x) => x.name));
+  const out = { pool: pf, tick: tf }; poolFieldsCache.set(id, out); return out;
+}
+async function liqMap(chainKey, addrRaw, key, priceIn) {
+  const chain = CHAINS[chainKey]; const addr = String(addrRaw).toLowerCase();
+  if (!chain || !chain.sources) throw new UErr('liqNoChain');
+  const notes = []; const found = [];
+  for (const src0 of chain.sources.filter((x) => x.ver === 'V3' || x.ver === 'V4')) {
+    let src; try { ({ src } = await resolveSrc(key, src0)); } catch (e) { if (e.fatal) throw e; notes.push(`${src0.name}: ${e.code || e.message}`); continue; }
+    let F; try { F = await poolFields(key, src.id); } catch (_) { continue; }
+    if (!F.tick.has('liquidityNet') || !F.pool.has('totalValueLockedUSD')) { notes.push(`${src.name}: no ticks`); continue; }
+    const sq = F.pool.has('sqrtPrice') ? 'sqrtPrice' : null;
+    const fee = F.pool.has('feeTier') ? 'feeTier' : (F.pool.has('fee') ? 'fee' : '');
+    const fields = `id ${fee} ${sq || ''} tick liquidity totalValueLockedUSD token0 { id symbol decimals } token1 { id symbol decimals }`;
+    let d; try {
+      d = await gql(key, src.id, `{ a: pools(first: 3, orderBy: totalValueLockedUSD, orderDirection: desc, where: { token0: "${addr}" }) { ${fields} }
+        b: pools(first: 3, orderBy: totalValueLockedUSD, orderDirection: desc, where: { token1: "${addr}" }) { ${fields} } }`);
+    } catch (e) { if (e.fatal) throw e; notes.push(`${src.name}: ${msgOf(e, 'en')}`); continue; }
+    for (const p of [...(d.a || []), ...(d.b || [])]) found.push({ p, src, fee });
+  }
+  found.sort((x, y) => num(y.p.totalValueLockedUSD) - num(x.p.totalValueLockedUSD));
+  const seen = new Set(); const top = found.filter((x) => !seen.has(x.p.id) && seen.add(x.p.id)).slice(0, 3);
+  let price = Number(priceIn) > 0 ? Number(priceIn) : 0;
+  const pools = [];
+  for (const { p, src, fee } of top) {
+    const tokenIs0 = p.token0.id.toLowerCase() === addr;
+    const d0 = Number(p.token0.decimals) || 0, d1 = Number(p.token1.decimals) || 0;
+    const sqrtPriceRaw = p.sqrtPrice && num(p.sqrtPrice) > 0 ? num(p.sqrtPrice) / 2 ** 96 : Math.pow(1.0001, Number(p.tick) / 2);
+    // ticks com liquidez (por páginas de 1000)
+    const ticks = []; let after = -887273;
+    for (let page = 0; page < 8; page++) {
+      let r; try { r = await gql(key, src.id, `{ t: ticks(first: 1000, orderBy: tickIdx, orderDirection: asc, where: { pool: "${p.id}", tickIdx_gt: ${after}, liquidityNet_not: "0" }) { tickIdx liquidityNet } }`); }
+      catch (e) { if (e.fatal) throw e; break; }
+      const list = r.t || []; for (const x of list) ticks.push({ t: Number(x.tickIdx), net: num(x.liquidityNet) });
+      if (list.length < 1000) break; after = Number(list[list.length - 1].tickIdx);
+    }
+    const other = tokenIs0 ? p.token1 : p.token0; const me = tokenIs0 ? p.token0 : p.token1;
+    const z = liqZones({ tokenIs0, d0, d1, sqrtPriceRaw, ticks }, price);
+    const feePct = fee && p[fee] != null ? Number(p[fee]) / 10000 : null;
+    pools.push({ id: p.id, dex: src.name, ver: src.ver, fee: feePct, pair: `${me.symbol}/${other.symbol}`, tvl: num(p.totalValueLockedUSD),
+      zones: z.usd, total: z.total, ticks: ticks.length,
+      link: UNI_SLUG[chainKey] ? `https://app.uniswap.org/explore/pools/${UNI_SLUG[chainKey]}/${p.id}` : null });
+  }
+  return { chain: chainKey, chainLabel: chain.label, address: addr, price, zones: LIQ_ZONES.map((x) => (Number.isFinite(x) ? x : null)), pools, notes };
+}
+async function handleLiqmap(req, res) {
+  const q = new URL(req.url, 'http://x').searchParams; const lang = pickLang(q.get('lang'));
+  const send = (code, obj) => { res.writeHead(code, { 'content-type': 'application/json' }); res.end(JSON.stringify(obj)); };
+  const addr = String(q.get('address') || '').trim(); const chain = String(q.get('chain') || '');
+  if (!isEvmAddr(addr)) return send(400, { error: tr(lang, 'badAddr') });
+  if (!CHAINS[chain] || !CHAINS[chain].sources) return send(400, { error: tr(lang, 'liqNoChain') });
+  const lim = rateCheck(req, 'token'); if (lim) return send(429, { error: tr(lang, 'lookupLimited', lim) });
+  try { send(200, await liqMap(chain, addr, String(q.get('apiKey') || '').trim() || CONFIG_KEY, q.get('price'))); }
+  catch (e) { send(500, { error: msgOf(e, lang) }); }
+}
+
 async function addLpBurn(rows, key) {
   const byChain = new Map();
   for (const r of rows) { if (r.cex) continue; if (!byChain.has(r.chain)) byChain.set(r.chain, []); byChain.get(r.chain).push(r); }
@@ -1623,6 +1718,11 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && req.url === '/api/scan') return await handleScan(req, res);
     if (req.method === 'POST' && req.url === '/api/token') return await handleToken(req, res);
+    if (req.method === 'GET' && req.url.startsWith('/api/liqmap?')) return await handleLiqmap(req, res);
+    if (req.method === 'GET' && (req.url === '/liq.html' || req.url.startsWith('/liq.html?'))) {
+      res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+      return res.end(fs.readFileSync(path.join(__dirname, 'public', 'liq.html')));
+    }
     if (req.method === 'GET' && req.url === '/api/config') {
       res.writeHead(200, { 'content-type': 'application/json' });
       return res.end(JSON.stringify({ hasKey: !!CONFIG_KEY, chains: Object.fromEntries(Object.entries(CHAINS).filter(([, c]) => !c.dynamic).map(([k, c]) => [k, c.others
@@ -1660,4 +1760,4 @@ if (require.main === module) {
     console.log('Limites por visitante/hora:', LIMITS.scan || 'sem limite', 'pesquisas,', LIMITS.token || 'sem limite', 'consultas · cache', SCAN_CACHE_MS / 60000, 'min');
   });
 }
-module.exports = { computeMetrics, mergeHist, finalFilter, sortRows, parseFilters, server };
+module.exports = { liqZones, LIQ_ZONES, computeMetrics, mergeHist, finalFilter, sortRows, parseFilters, server };
