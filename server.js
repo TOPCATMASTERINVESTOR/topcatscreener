@@ -459,6 +459,11 @@ async function scanEvm(chainKey, f, key, emit) {
     } catch (e) { throw e; }
     emit({ type: 'progress', msg: tr(f.lang, 'pricesRead', { src: src.name }), pct: 30 });
   }
+  // Supply e decimais do próprio contrato (o totalSupply do subgraph pode estar errado); se o RPC falhar, fica o do subgraph.
+  try {
+    const oc = await onchainSupply(chainKey, [...meta.keys()]);
+    for (const [id, m] of meta) { const o = oc.get(id); if (o) { m.supply = o.supply; m.decimals = o.decimals; } }
+  } catch (_) {}
   // Liquidez ≈ 2 × (tokens bloqueados nas pools × preço): conta os dois lados das pools, com o nosso preço (não o USD do subgraph).
   const liqOf = (id, price) => (liqSrcs.length && price > 0 ? 2 * (tvlAmt.get(id) || 0) * price : null);
 
@@ -944,6 +949,26 @@ const RPC = {
   optimism: process.env.RPC_OPTIMISM || 'https://optimism-rpc.publicnode.com',
   'gt:avax': process.env.RPC_AVAX || 'https://avalanche-c-chain-rpc.publicnode.com',
 };
+// totalSupply() e decimals() lidos diretamente do contrato de cada token (pedidos JSON-RPC em lote).
+// O campo totalSupply dos subgraphs pode vir errado (ex. Uniswap V3 Ethereum out/2026 → FDV ≈ 0): o contrato é a fonte certa.
+async function onchainSupply(chainKey, ids) {
+  const url = RPC[chainKey]; const out = new Map();
+  if (!url || !ids.length) return out;
+  const chunks = []; for (let i = 0; i < ids.length; i += 25) chunks.push(ids.slice(i, i + 25));
+  const one = async (chunk) => {
+    const calls = []; chunk.forEach((a, k) => { calls.push({ jsonrpc: '2.0', id: 2 * k, method: 'eth_call', params: [{ to: a, data: '0x18160ddd' }, 'latest'] });
+      calls.push({ jsonrpc: '2.0', id: 2 * k + 1, method: 'eth_call', params: [{ to: a, data: '0x313ce567' }, 'latest'] }); });
+    let res; try { const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(calls), signal: AbortSignal.timeout(20000) }); res = await r.json(); } catch (_) { return; }
+    if (!Array.isArray(res)) return;
+    const by = new Map(res.map((x) => [x.id, x.result]));
+    chunk.forEach((a, k) => {
+      const sup = hexBig(by.get(2 * k)); const decRaw = by.get(2 * k + 1); const dec = decRaw && decRaw !== '0x' ? Number(hexBig(decRaw)) : null;
+      if (sup > 0n && dec != null && dec >= 0 && dec <= 36) out.set(a, { supply: Number(sup) / Math.pow(10, dec), decimals: dec });
+    });
+  };
+  for (let i = 0; i < chunks.length; i += 4) await Promise.all(chunks.slice(i, i + 4).map(one));   // 4 lotes de cada vez
+  return out;
+}
 const hexBig = (h) => { try { return h && h !== '0x' ? BigInt(h) : 0n; } catch (_) { return 0n; } };
 async function burnedPctOnChain(rpcUrl, pairs) {
   const out = new Map();
@@ -1242,10 +1267,11 @@ async function lookupEvm(chainKey, addrRaw, key, versions, local) {
   const days = hist.get(addr) || new Map();
   if (!days.size) return null;
   const best = bestSource(days, prices) || Object.keys(prices)[0];
+  try { const o = (await onchainSupply(chainKey, [addr])).get(addr); if (o && meta) meta.chainSupply = o.supply; } catch (_) {}
   const r = computeMetrics(days, prices[best] || 0, now, local);
   if (!r) return null;
   const row = { address: addr, symbol: meta.symbol, name: meta.name, link: chain.explorer + addr, sources: srcNames.join(' + '),
-    fdv: meta.supply && r.price ? meta.supply * r.price : null, liquidity: hasLiq ? 2 * tvl * r.price : null,
+    fdv: (meta.chainSupply || meta.supply) && r.price ? (meta.chainSupply || meta.supply) * r.price : null, liquidity: hasLiq ? 2 * tvl * r.price : null,
     ...r, chain: chainKey, chainLabel: chain.label };
   let candles = null;
   for (const src of okSrcs) {
