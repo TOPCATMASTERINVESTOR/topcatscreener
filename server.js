@@ -1320,7 +1320,15 @@ async function handleToken(req, res) {
       try { return useGecko(k, body.source) ? await lookupGecko(k, addr, parseLocal(body.local)) : await lookupEvm(k, addr, key, parseVersions(body.versions), parseLocal(body.local)); }
       catch (e) { errors.push(`${CHAINS[k].label}: ${msgOf(e, lang)}`); return null; }
     }));
-    const rows = results.filter(Boolean);
+    let rows = results.filter(Boolean);
+    // Não encontrado na The Graph (ex. só tem pools Uniswap V4, outra DEX, ou versões desligadas nas Definições):
+    // tenta o GeckoTerminal (todas as DEX) nas chains Uniswap, uma de cada vez, até o encontrar.
+    if (!rows.length) {
+      for (const k of keys.filter((x) => !useGecko(x, body.source) && CHAINS[x].gtNet)) {
+        try { const r = await lookupGecko(k, addr, parseLocal(body.local)); if (r) { rows = [r]; break; } }
+        catch (e) { errors.push(`${CHAINS[k].label} (GeckoTerminal): ${msgOf(e, lang)}`); }
+      }
+    }
     if (!rows.length) return send(404, { error: keys.length === 1 ? tr(lang, 'notFound', { chain: CHAINS[keys[0]].label }) : tr(lang, 'notFoundAny'), warnings: errors });
     await addRisk(rows, lang, null);
     await addLpBurn(rows, key);
