@@ -29,12 +29,12 @@ RATE_LOOKUPS_HOUR="${RATE_LOOKUPS_HOUR:-60}"
 SCAN_CACHE_MIN="${SCAN_CACHE_MIN:-10}"
 # Chave grátis do CoinGecko (plano Demo) para "Outras blockchains": mais rápido. Opcional; fica guardada entre atualizações.
 #   COINGECKO_API_KEY=CG-xxxx bash deploy-vps.sh topcatlabs.com
-COINGECKO_API_KEY="${COINGECKO_API_KEY:-$(sed -n 's/^Environment=COINGECKO_API_KEY=//p' /etc/systemd/system/topcatscreener.service 2>/dev/null | head -1)}"
+COINGECKO_API_KEY="${COINGECKO_API_KEY:-$( { sed -n 's/^Environment=COINGECKO_API_KEY=//p' /etc/systemd/system/topcatscreener.service 2>/dev/null || true; } | head -1)}"
 
 # Chaves opcionais: ficam em /etc/topcatscreener.env (só o root lê). Sem GRAPH_API_KEY, usa a chave de testes do código.
 # Para usar outra:  GRAPH_API_KEY=a_tua_chave bash deploy-vps.sh topcatlabs.com   (depois fica guardada)
 ENV_FILE=/etc/topcatscreener.env
-envget() { sed -n "s/^$1=//p" "$ENV_FILE" 2>/dev/null | head -1; }
+envget() { [ -f "$ENV_FILE" ] && sed -n "s/^$1=//p" "$ENV_FILE" | head -1 || true; }   # sem o ficheiro (1.ª vez) devolve vazio
 GRAPH_API_KEY="${GRAPH_API_KEY:-$(envget GRAPH_API_KEY)}"
 COINGECKO_API_KEY="${COINGECKO_API_KEY:-$(envget COINGECKO_API_KEY)}"
 umask 077
