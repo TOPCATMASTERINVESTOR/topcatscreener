@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TopCat Labs</title>
+<meta name="description" content="TopCat Labs — on-chain tools: TopCat Screener and TopCat Swap.">
+<meta name="theme-color" content="#081426">
+<link rel="icon" type="image/png" href="/assets/screener.png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#081426; --bg2:#0b1b33; --panel:#0e2038; --line:#1f3657; --text:#eaf1fb; --muted:#93a6c2;
+  --blue:#1a8cff; --teal:#14d2b4; --good:#2fd39a;
+  --sans:'Archivo',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font:16px/1.55 var(--sans);min-height:100vh;overflow-x:hidden}
+a{color:inherit}
+/* brilho de fundo */
+body::before{content:"";position:fixed;inset:-20% -10% auto -10%;height:80vh;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 50% at 25% 30%,rgba(26,140,255,.22),transparent 70%),radial-gradient(35% 45% at 80% 20%,rgba(20,210,180,.16),transparent 70%)}
+.wrap{max-width:1120px;margin:0 auto;padding:22px 20px 56px}
+header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.brand img{width:40px;height:40px;border-radius:10px}
+.brand b{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.brand b span{background:linear-gradient(90deg,var(--blue),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lang{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:rgba(14,32,56,.7);border-radius:10px;padding:0 4px 0 10px;color:var(--muted);min-height:44px}
+.lang select{background:transparent;border:0;color:var(--text);font:600 14px var(--sans);padding:8px 4px;min-height:42px;cursor:pointer}
+.lang select option{background:var(--panel)}
+.lang select:focus-visible,.btn:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.hero{padding:72px 0 44px;max-width:760px}
+.eyebrow{font:600 12px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--teal)}
+h1{font-size:clamp(34px,5.4vw,58px);line-height:1.04;letter-spacing:-.03em;margin:14px 0 18px;font-weight:800}
+h1 em{font-style:normal;background:linear-gradient(90deg,var(--blue),var(--teal));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{font-size:18px;color:var(--muted);margin:0;max-width:640px}
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+@media (max-width:820px){.tools{grid-template-columns:1fr}.hero{padding:44px 0 30px}}
+.card{position:relative;display:flex;flex-direction:column;gap:18px;padding:28px;border-radius:20px;background:linear-gradient(180deg,rgba(17,38,66,.92),rgba(11,27,51,.92));border:1px solid var(--line);overflow:hidden;transition:transform .2s,border-color .2s}
+.card::after{content:"";position:absolute;inset:auto -30% -55% auto;width:70%;height:90%;border-radius:50%;background:radial-gradient(closest-side,var(--glow),transparent);opacity:.18;pointer-events:none}
+.card.screener{--glow:var(--teal)} .card.swap{--glow:var(--blue)}
+.card:hover{transform:translateY(-3px);border-color:#2c4c78}
+.top{display:flex;align-items:center;gap:16px}
+.top img{width:84px;height:84px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.35);flex:none}
+.top h2{margin:0;font-size:24px;letter-spacing:-.02em}
+.pill{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:999px;border:1px solid}
+.pill.live{color:var(--good);border-color:rgba(47,211,154,.4);background:rgba(47,211,154,.08)}
+.pill.live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--good);box-shadow:0 0 0 3px rgba(47,211,154,.18)}
+.pill.soon{color:#f5cf4a;border-color:rgba(245,207,74,.4);background:rgba(245,207,74,.07)}
+.card p{margin:0;color:var(--muted)}
+.card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.card li{display:flex;gap:10px;align-items:flex-start;font-size:15px}
+.card li svg{flex:none;margin-top:3px;color:var(--teal)}
+.btn{margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 22px;border-radius:12px;font:700 16px var(--sans);text-decoration:none;color:#fff;background:linear-gradient(90deg,#0f6fd6,#0ea5a0);box-shadow:0 8px 24px rgba(15,111,214,.3);align-self:flex-start}
+.btn:hover{filter:brightness(1.08)}
+.btn[aria-disabled="true"]{background:#1a2c47;color:var(--muted);box-shadow:none;pointer-events:none}
+.chains{margin:46px 0 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;color:var(--muted);font-size:14px}
+.chains span{font:600 12px var(--mono);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(14,32,56,.6);color:var(--text)}
+footer{margin-top:56px;padding-top:22px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="/"><img src="/assets/screener.png" alt=""><b>TopCat <span>Labs</span></b></a>
+    <label class="lang"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg><span class="sr" data-t="lang"></span><select id="lang"></select></label>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow" data-t="eyebrow"></div>
+    <h1 data-t-html="h1"></h1>
+    <p data-t="lead"></p>
+  </section>
+
+  <section class="tools" aria-label="Tools">
+    <article class="card screener">
+      <div class="top"><img src="/assets/screener.png" alt=""><div><h2>TopCat Screener</h2><span class="pill live" data-t="live"></span></div></div>
+      <p data-t="sc_desc"></p>
+      <ul id="sc_list"></ul>
+      <a class="btn" href="/screener/"><span data-t="open_sc"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+    </article>
+    <article class="card swap">
+      <div class="top"><img src="/assets/swap.png" alt=""><div><h2>TopCat Swap</h2><span class="pill" id="swapPill"></span></div></div>
+      <p data-t="sw_desc"></p>
+      <ul id="sw_list"></ul>
+      <a class="btn" id="swapBtn" href="/swap/"><span data-t="open_sw"></span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+    </article>
+  </section>
+
+  <div class="chains"><b data-t="chains"></b><span>Ethereum</span><span>Base</span><span>BSC</span><span>Arbitrum</span><span>Polygon</span><span>Optimism</span><span>Solana</span><span>Robinhood Chain</span><span>Arc</span></div>
+
+  <footer><span>© <span id="yr"></span> TopCat Labs</span><span data-t="disclaimer"></span></footer>
+</div>
+
+<script>
+const SWAP_LIVE = true;
+
+const T = {
+  en:{ _n:'English', lang:'Language', eyebrow:'On-chain tools', h1:'Sharp tools for <em>on-chain traders</em>',
+    lead:'Spot tokens before the crowd and trade them at the best price — across Ethereum, Base, BSC, Solana and more.',
+    live:'Live', soon:'Coming soon', open_sc:'Open Screener', open_sw:'Open Swap', soon_btn:'Coming soon',
+    sc_desc:'Scan 9 blockchains for tokens close to their all-time high. Filter by FDV, liquidity, volume and age, with scam alerts on every result.',
+    sc_list:['Uniswap V2 · V3 · V4 and GeckoTerminal data','Honeypot and rug-pull alerts','Price changes and charts from 1 hour to 1 year'],
+    sw_desc:'Compares the Uniswap V2, V3 and V4 pools for your pair and swaps on the one that gives you the most tokens, signed by your own wallet.',
+    sw_list:['Ledger, Trezor, MetaMask, Rabby, OKX and more','Sandwich protection and private bundles','Open source, no server: keys never leave your wallet'],
+    chains:'Screener chains', disclaimer:'Not financial advice. Always check a token’s contract before trading.' },
+  es:{ _n:'Español', lang:'Idioma', eyebrow:'Herramientas on-chain', h1:'Herramientas precisas para <em>traders on-chain</em>',
+    lead:'Encuentra tokens antes que nadie y opéralos al mejor precio — en Ethereum, Base, BSC, Solana y más.',
+    live:'Activo', soon:'Próximamente', open_sc:'Abrir Screener', open_sw:'Abrir Swap', soon_btn:'Próximamente',
+    sc_desc:'Analiza 9 blockchains en busca de tokens cerca de su máximo histórico. Filtra por FDV, liquidez, volumen y edad, con alertas de estafa en cada resultado.',
+    sc_list:['Datos de Uniswap V2 · V3 · V4 y GeckoTerminal','Alertas de honeypot y rug pull','Cambios de precio y gráficos de 1 hora a 1 año'],
+    sw_desc:'Compara los pools de Uniswap V2, V3 y V4 de tu par y hace el swap en el que te da más tokens, firmado por tu propia wallet.',
+    sw_list:['Ledger, Trezor, MetaMask, Rabby, OKX y más','Protección contra sandwich y bundles privados','Código abierto, sin servidor: las claves nunca salen de tu wallet'],
+    chains:'Blockchains del Screener', disclaimer:'No es asesoramiento financiero. Revisa siempre el contrato antes de operar.' },
+  ru:{ _n:'Русский', lang:'Язык', eyebrow:'Ончейн-инструменты', h1:'Точные инструменты для <em>ончейн-трейдеров</em>',
+    lead:'Находите токены раньше других и торгуйте по лучшей цене — в Ethereum, Base, BSC, Solana и других сетях.',
+    live:'Работает', soon:'Скоро', open_sc:'Открыть Скринер', open_sw:'Открыть Swap', soon_btn:'Скоро',
+    sc_desc:'Сканирует 9 блокчейнов в поиске токенов рядом с их историческим максимумом. Фильтры по FDV, ликвидности, объёму и возрасту, с предупреждениями о скаме для каждого результата.',
+    sc_list:['Данные Uniswap V2 · V3 · V4 и GeckoTerminal','Предупреждения о honeypot и rug pull','Изменение цены и графики от 1 часа до 1 года'],
+    sw_desc:'Сравнивает пулы Uniswap V2, V3 и V4 для вашей пары и проводит обмен в том, где вы получите больше токенов. Подпись — вашим собственным кошельком.',
+    sw_list:['Ledger, Trezor, MetaMask, Rabby, OKX и другие','Защита от сэндвич-атак и приватные бандлы','Открытый код, без сервера: ключи не покидают кошелёк'],
+    chains:'Сети Скринера', disclaimer:'Не является финансовой рекомендацией. Всегда проверяйте контракт токена перед сделкой.' },
+  zh:{ _n:'中文', lang:'语言', eyebrow:'链上工具', h1:'为<em>链上交易者</em>打造的利器',
+    lead:'抢先发现代币，并以最优价格交易 — 支持 Ethereum、Base、BSC、Solana 等多条链。',
+    live:'已上线', soon:'即将推出', open_sc:'打开筛选器', open_sw:'打开 Swap', soon_btn:'即将推出',
+    sc_desc:'扫描 9 条区块链，找出接近历史最高价的代币。可按 FDV、流动性、交易量和上线时间筛选，每个结果都附带诈骗警报。',
+    sc_list:['Uniswap V2 · V3 · V4 与 GeckoTerminal 数据','貔貅盘和跑路风险警报','从 1 小时到 1 年的价格变化和走势图'],
+    sw_desc:'比较你的交易对在 Uniswap V2、V3 和 V4 的资金池，在能让你获得最多代币的池中兑换，由你自己的钱包签名。',
+    sw_list:['支持 Ledger、Trezor、MetaMask、Rabby、OKX 等','防三明治攻击和私有交易包','开源、无服务器：私钥永不离开你的钱包'],
+    chains:'筛选器支持的链', disclaimer:'不构成投资建议。交易前请务必核实代币合约。' },
+  pt:{ _n:'Português', lang:'Idioma', eyebrow:'Ferramentas on-chain', h1:'Ferramentas certeiras para <em>traders on-chain</em>',
+    lead:'Encontra tokens antes de toda a gente e negocia-os ao melhor preço — em Ethereum, Base, BSC, Solana e mais.',
+    live:'Online', soon:'Em breve', open_sc:'Abrir Screener', open_sw:'Abrir Swap', soon_btn:'Em breve',
+    sc_desc:'Analisa 9 blockchains à procura de tokens perto do máximo histórico. Filtra por FDV, liquidez, volume e idade, com alertas de scam em cada resultado.',
+    sc_list:['Dados Uniswap V2 · V3 · V4 e GeckoTerminal','Alertas de honeypot e rug pull','Variação de preço e gráficos de 1 hora a 1 ano'],
+    sw_desc:'Compara as pools Uniswap V2, V3 e V4 do teu par e faz o swap na que te dá mais tokens, assinado pela tua própria carteira.',
+    sw_list:['Ledger, Trezor, MetaMask, Rabby, OKX e mais','Proteção contra sandwich e bundles privados','Código aberto, sem servidor: as chaves nunca saem da tua carteira'],
+    chains:'Blockchains do Screener', disclaimer:'Não é aconselhamento financeiro. Verifica sempre o contrato de um token antes de negociar.' },
+};
+const LANGS=['en','es','ru','zh','pt'];
+// mesma chave que o Screener usa, para o idioma se manter entre páginas
+const get=()=>{ try{ return JSON.parse(localStorage.getItem('aths:lang')); }catch{ return null; } };
+const set=v=>{ try{ localStorage.setItem('aths:lang', JSON.stringify(v)); }catch{} };
+let L = LANGS.includes(get()) ? get() : 'en';
+const CHECK='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5"></path></svg>';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function apply(){
+  const d=T[L]||T.en; document.documentElement.lang = L==='zh'?'zh-CN':L;
+  document.querySelectorAll('[data-t]').forEach(e=>e.textContent=d[e.dataset.t]);
+  document.querySelectorAll('[data-t-html]').forEach(e=>e.innerHTML=d[e.dataset.tHtml]);
+  document.getElementById('sc_list').innerHTML=d.sc_list.map(x=>`<li>${CHECK}<span>${esc(x)}</span></li>`).join('');
+  document.getElementById('sw_list').innerHTML=d.sw_list.map(x=>`<li>${CHECK}<span>${esc(x)}</span></li>`).join('');
+  const pill=document.getElementById('swapPill'); pill.className='pill '+(SWAP_LIVE?'live':'soon'); pill.textContent=SWAP_LIVE?d.live:d.soon;
+  const btn=document.getElementById('swapBtn'); btn.setAttribute('aria-disabled', String(!SWAP_LIVE)); btn.querySelector('span').textContent = SWAP_LIVE?d.open_sw:d.soon_btn;
+  if(!SWAP_LIVE) btn.setAttribute('tabindex','-1'); else btn.removeAttribute('tabindex');
+}
+const sel=document.getElementById('lang');
+sel.innerHTML=LANGS.map(l=>`<option value="${l}">${T[l]._n}</option>`).join(''); sel.value=L;
+sel.addEventListener('change',()=>{ L=sel.value; set(L); apply(); });
+document.getElementById('yr').textContent=new Date().getFullYear();
+apply();
+</script>
+</body>
+</html>
