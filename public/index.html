@@ -350,6 +350,7 @@ td.c-risk{min-width:250px}
         </div>
         <div class="right">
           <span class="count" id="count"></span>
+          <button class="btn2 strong" id="trendBtn" type="button" disabled data-i18n="tr_btn"></button>
           <button class="btn2" id="csv" type="button" disabled data-i18n="csv"></button>
         </div>
       </div>
@@ -734,6 +735,12 @@ function liqLink(r){
   const c=CFG.chains[r.chain]; if(!c || !c.versions || !c.versions.length || r.cex || !/^0x[0-9a-fA-F]{40}$/.test(String(r.address))) return null;
   return 'liq.html?'+new URLSearchParams({chain:r.chain, address:r.address, sym:r.symbol||'', price:String(r.price||''), lang:LANG}).toString();
 }
+// Análise de tendência: abre trend.html numa tab nova com a lista atual (lida via window.opener)
+$('trendBtn').onclick=()=>{
+  const keep=['symbol','name','address','chain','chainLabel','link','price','pctOfAth','ath','athDate','atl','atlDate','daysSinceAth','atlDays','athPartial','hist','fdv','liquidity'];
+  window.TREND_DATA={ at:Date.now(), lang:LANG, rows:ROWS.filter(r=>r.hist).map(r=>Object.fromEntries(keep.filter(k=>r[k]!==undefined).map(k=>[k,r[k]]))) };
+  window.open('trend.html','_blank');
+};
 function lpPie(r){
   const lv=lpLevel(r), p=r.lp?Math.max(0,Math.min(100,r.lp.pct)):0;
   // círculo + % queimada/bloqueada ao lado (na mesma cor)
@@ -876,7 +883,7 @@ function emptyRow(msg){ $('rows').innerHTML = `<tr><td colspan="${visCols().leng
 
 function render(){
   renderHead();
-  if(!ROWS.length){ emptyRow(SEARCHED ? t('empty_none') : t('empty_idle')); $('csv').disabled=true; updateMore(); window.syncTopScroll&&syncTopScroll(); return; }
+  if(!ROWS.length){ emptyRow(SEARCHED ? t('empty_none') : t('empty_idle')); $('csv').disabled=true; $('trendBtn').disabled=true; updateMore(); window.syncTopScroll&&syncTopScroll(); return; }
   updateMore();
   const cols = visCols();
   $('rows').innerHTML = ROWS.slice(0, SHOWN).map((r,i)=>`<tr>
@@ -884,7 +891,7 @@ function render(){
     <td class="c-token"><a href="${esc(r.link)}" target="_blank" rel="noopener"><span class="sym">${esc(r.symbol)}</span></a><span class="nm" title="${esc(r.name)} · ${esc(r.address)}">${esc(r.name)}</span><span class="src">${esc(r.sources)}</span>${VIS.has('chain')?`<span class="cb cb-m">${esc(r.chainLabel)}</span>`:''}</td>`+
     cols.map(c=>`<td class="${c.cls||''}"${c.title?` title="${esc(c.title(r))}"`:''}><span class="lbl">${esc(colLabel(c))}</span>${c.cell(r)}</td>`).join('')+`
   </tr>`).join('');
-  $('csv').disabled=false;
+  $('csv').disabled=false; $('trendBtn').disabled=!ROWS.some(r=>r.hist);
   window.syncTopScroll&&syncTopScroll();
 }
 

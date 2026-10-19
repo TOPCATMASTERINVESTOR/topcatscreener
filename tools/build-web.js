@@ -125,6 +125,8 @@ let liq = fs.readFileSync(path.join(PUB, 'liq.html'), 'utf8');
 if (!liq.includes('<script src="i18n.js"></script>')) throw new Error('liq.html: não encontrei <script src="i18n.js">');
 liq = liq.replace('<script src="i18n.js"></script>', '<script src="config.js"></script>\n<script src="engine.js"></script>\n<script src="i18n.js"></script>');
 fs.writeFileSync(path.join(OUT, 'liq.html'), liq);
+// análise de tendência (não usa o motor: os dados vêm da página que a abriu)
+for (const f of ['trend.html', 'trendcore.js']) fs.copyFileSync(path.join(PUB, f), path.join(OUT, f));
 fs.writeFileSync(path.join(OUT, '.nojekyll'), '');
 
 console.log('dist-web/ criado' + (key ? ' (com chave da The Graph)' : ' (sem chave: os visitantes colam a sua)'));

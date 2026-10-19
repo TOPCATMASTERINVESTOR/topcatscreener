@@ -139,3 +139,10 @@ O Screener também corre como site estático: **https://topcatmasterinvestor.git
 - Usa a chave de testes incluída no código. Para outra, cria o secret **GRAPH_API_KEY** (Settings › Secrets and variables › Actions); o workflow usa-a no lugar da de testes.
 - Para experimentar no teu computador: `node tools/build-web.js && python3 -m http.server 8080 -d dist-web` → http://localhost:8080
 
+## Análise de tendência
+
+Depois de uma pesquisa, o botão **Análise de tendência** abre uma tab nova com a lista atual (os resultados trazem até 3 anos de fechos diários).
+- **Tipo 1** — ATH → queda até ao ATL → recuperação: sliders L (ATH→hoje), L1 (ATH→ATL), L2 (ATL→hoje) e d.
+- **Tipo 2** — subida a partir do ATL: sliders L (ATL→hoje) e d.
+- Um intervalo **d** vai de um máximo local (fecho diário) ao primeiro fecho acima desse máximo; os intervalos seguem-se a partir do ATL. A lista é ordenada pelo número de intervalos d dentro do intervalo escolhido (lógica em `public/trendcore.js`).
+

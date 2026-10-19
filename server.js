@@ -213,7 +213,7 @@ const GECKO_MAX_CANDIDATES = 45;
 const SMSG = {
   en: {
     riskCheck: 'Checking scam risk (GoPlus) {d}/{n}', riskFail: 'Scam check unavailable on {chain} ({err})',
-    unavailable: '{src}: unavailable ({err})', noPools: 'no {v} pools indexed on this blockchain', noTdd: 'subgraph without daily token data', liqNoChain: 'the liquidity map is only available for Uniswap V3/V4 pools on EVM blockchains', noDex: 'GeckoTerminal has no {dex} pools on this blockchain', sgBroken: 'subgraph broken at the indexers, waiting for a fix by its publisher', staleSg: 'subgraph stopped updating on {d}',
+    unavailable: '{src}: unavailable ({err})', noPools: 'no {v} pools indexed on this blockchain', noTdd: 'subgraph without daily token data', liqFind: '{src}: looking for the token\'s pools', liqTicks: 'pool {i}/{n} ({pair}): reading liquidity ticks, page {p}', liqNoChain: 'the liquidity map is only available for Uniswap V3/V4 pools on EVM blockchains', noDex: 'GeckoTerminal has no {dex} pools on this blockchain', sgBroken: 'subgraph broken at the indexers, waiting for a fix by its publisher', staleSg: 'subgraph stopped updating on {d}',
     volTokens: '{src}: {n} tokens with volume (page {p})', noSubgraph: 'No subgraph for this blockchain responded.',
     pricesRead: '{src}: prices and supply loaded', candidates: '{n} candidates — reading daily history',
     history: '{src}: history {d}/{n}', hourly: '{src}: hourly data for {n} tokens',
@@ -228,7 +228,7 @@ const SMSG = {
   },
   es: {
     riskCheck: 'Comprobando riesgo de estafa (GoPlus) {d}/{n}', riskFail: 'Comprobación de estafas no disponible en {chain} ({err})',
-    unavailable: '{src}: no disponible ({err})', noPools: 'no hay pools {v} indexados en esta blockchain', noTdd: 'subgraph sin datos diarios de tokens', liqNoChain: 'el mapa de liquidez solo está disponible para pools Uniswap V3/V4 en blockchains EVM', noDex: 'GeckoTerminal no tiene pools de {dex} en esta blockchain', sgBroken: 'subgraph averiado en los indexadores, a la espera de que lo corrija quien lo publica', staleSg: 'el subgraph dejó de actualizarse el {d}',
+    unavailable: '{src}: no disponible ({err})', noPools: 'no hay pools {v} indexados en esta blockchain', noTdd: 'subgraph sin datos diarios de tokens', liqFind: '{src}: buscando los pools del token', liqTicks: 'pool {i}/{n} ({pair}): leyendo los ticks de liquidez, página {p}', liqNoChain: 'el mapa de liquidez solo está disponible para pools Uniswap V3/V4 en blockchains EVM', noDex: 'GeckoTerminal no tiene pools de {dex} en esta blockchain', sgBroken: 'subgraph averiado en los indexadores, a la espera de que lo corrija quien lo publica', staleSg: 'el subgraph dejó de actualizarse el {d}',
     volTokens: '{src}: {n} tokens con volumen (página {p})', noSubgraph: 'Ningún subgraph de esta blockchain respondió.',
     pricesRead: '{src}: precios y supply leídos', candidates: '{n} candidatos — leyendo el historial diario',
     history: '{src}: historial {d}/{n}', hourly: '{src}: datos por hora de {n} tokens',
@@ -243,7 +243,7 @@ const SMSG = {
   },
   ru: {
     riskCheck: 'Проверка на скам (GoPlus) {d}/{n}', riskFail: 'Проверка на скам недоступна для {chain} ({err})',
-    unavailable: '{src}: недоступен ({err})', noPools: 'в этом блокчейне нет проиндексированных пулов {v}', noTdd: 'в subgraph нет дневных данных токенов', liqNoChain: 'карта ликвидности доступна только для пулов Uniswap V3/V4 в EVM-блокчейнах', noDex: 'в GeckoTerminal нет пулов {dex} в этом блокчейне', sgBroken: 'subgraph сломан у индексаторов, ждём исправления от издателя', staleSg: 'subgraph перестал обновляться {d}',
+    unavailable: '{src}: недоступен ({err})', noPools: 'в этом блокчейне нет проиндексированных пулов {v}', noTdd: 'в subgraph нет дневных данных токенов', liqFind: '{src}: поиск пулов токена', liqTicks: 'пул {i}/{n} ({pair}): чтение тиков ликвидности, стр. {p}', liqNoChain: 'карта ликвидности доступна только для пулов Uniswap V3/V4 в EVM-блокчейнах', noDex: 'в GeckoTerminal нет пулов {dex} в этом блокчейне', sgBroken: 'subgraph сломан у индексаторов, ждём исправления от издателя', staleSg: 'subgraph перестал обновляться {d}',
     volTokens: '{src}: токенов с объёмом: {n} (страница {p})', noSubgraph: 'Ни один subgraph этого блокчейна не ответил.',
     pricesRead: '{src}: цены и эмиссия загружены', candidates: 'кандидатов: {n} — читаем дневную историю',
     history: '{src}: история {d}/{n}', hourly: '{src}: почасовые данные для {n} токенов',
@@ -258,7 +258,7 @@ const SMSG = {
   },
   zh: {
     riskCheck: '正在检查诈骗风险（GoPlus）{d}/{n}', riskFail: '{chain} 暂无法进行诈骗检查（{err}）',
-    unavailable: '{src}：不可用（{err}）', noPools: '此链上没有已索引的 {v} 资金池', noTdd: 'subgraph 缺少代币日数据', liqNoChain: '流动性分布图仅适用于 EVM 区块链上的 Uniswap V3/V4 资金池', noDex: 'GeckoTerminal 在此链上没有 {dex} 资金池', sgBroken: 'subgraph 在索引节点出错，等待发布者修复', staleSg: 'subgraph 已于 {d} 停止更新',
+    unavailable: '{src}：不可用（{err}）', noPools: '此链上没有已索引的 {v} 资金池', noTdd: 'subgraph 缺少代币日数据', liqFind: '{src}：正在查找代币的资金池', liqTicks: '资金池 {i}/{n}（{pair}）：读取流动性 tick，第 {p} 页', liqNoChain: '流动性分布图仅适用于 EVM 区块链上的 Uniswap V3/V4 资金池', noDex: 'GeckoTerminal 在此链上没有 {dex} 资金池', sgBroken: 'subgraph 在索引节点出错，等待发布者修复', staleSg: 'subgraph 已于 {d} 停止更新',
     volTokens: '{src}：{n} 个有交易量的代币（第 {p} 页）', noSubgraph: '此链的 subgraph 均无响应。',
     pricesRead: '{src}：已读取价格和供应量', candidates: '{n} 个候选 — 正在读取日线历史',
     history: '{src}：历史 {d}/{n}', hourly: '{src}：{n} 个代币的小时数据',
@@ -273,7 +273,7 @@ const SMSG = {
   },
   pt: {
     riskCheck: 'A verificar risco de scam (GoPlus) {d}/{n}', riskFail: 'Verificação de scam indisponível em {chain} ({err})',
-    unavailable: '{src}: indisponível ({err})', noPools: 'não há pools {v} indexadas nesta blockchain', noTdd: 'subgraph sem dados diários de tokens', liqNoChain: 'o mapa de liquidez só existe para pools Uniswap V3/V4 em blockchains EVM', noDex: 'o GeckoTerminal não tem pools {dex} nesta blockchain', sgBroken: 'subgraph avariado nos indexadores, à espera que quem o publica o corrija', staleSg: 'o subgraph deixou de atualizar em {d}',
+    unavailable: '{src}: indisponível ({err})', noPools: 'não há pools {v} indexadas nesta blockchain', noTdd: 'subgraph sem dados diários de tokens', liqFind: '{src}: a procurar as pools do token', liqTicks: 'pool {i}/{n} ({pair}): a ler os ticks de liquidez, página {p}', liqNoChain: 'o mapa de liquidez só existe para pools Uniswap V3/V4 em blockchains EVM', noDex: 'o GeckoTerminal não tem pools {dex} nesta blockchain', sgBroken: 'subgraph avariado nos indexadores, à espera que quem o publica o corrija', staleSg: 'o subgraph deixou de atualizar em {d}',
     volTokens: '{src}: {n} tokens com volume (página {p})', noSubgraph: 'Nenhum subgraph desta blockchain respondeu.',
     pricesRead: '{src}: preços e supply lidos', candidates: '{n} candidatos — a ler histórico diário',
     history: '{src}: histórico {d}/{n}', hourly: '{src}: dados horários de {n} tokens',
@@ -550,6 +550,23 @@ async function scanEvm(chainKey, f, key, emit) {
 }
 
 // Propriedade interna (não vai no JSON).
+// Histórico diário compacto para a análise de tendência (na página nova, sem voltar a pesquisar):
+// { d0: 1.º dia (unix), c: [fecho de cada dia seguido] } — últimos 3 anos no máximo, dias sem negócio repetem o fecho anterior.
+const TREND_MAX_DAYS = 1095;
+function compactHist(days) {
+  if (!days || !days.size) return null;
+  const dates = [...days.keys()].filter((d) => days.get(d).close > 0).sort((a, b) => a - b);
+  if (!dates.length) return null;
+  const last = dates[dates.length - 1];
+  const from = Math.max(dates[0], last - (TREND_MAX_DAYS - 1) * DAY);
+  const c = []; let prev = null;
+  for (let d = from; d <= last; d += DAY) {
+    const e = days.get(d); if (e && e.close > 0) prev = e.close;
+    if (prev == null) { const before = dates.filter((x) => x < d).pop(); prev = before != null ? days.get(before).close : null; }
+    c.push(prev == null ? null : Number(prev.toPrecision(5)));
+  }
+  return { d0: from, c };
+}
 function hide(o, k, v) { Object.defineProperty(o, k, { value: v, enumerable: false, writable: true }); }
 
 // Velas horárias do subgraph (V3): [{t, o, c}] por ordem crescente.
@@ -1036,11 +1053,13 @@ async function poolFields(key, id) {
   const pf = new Set((d.p?.fields || []).map((x) => x.name)); const tf = new Set((d.t?.fields || []).map((x) => x.name));
   const out = { pool: pf, tick: tf }; poolFieldsCache.set(id, out); return out;
 }
-async function liqMap(chainKey, addrRaw, key, priceIn) {
+async function liqMap(chainKey, addrRaw, key, priceIn, emit = () => {}, lang = 'en') {
   const chain = CHAINS[chainKey]; const addr = String(addrRaw).toLowerCase();
   if (!chain || !chain.sources) throw new UErr('liqNoChain');
   const notes = []; const found = [];
-  for (const src0 of chain.sources.filter((x) => x.ver === 'V3' || x.ver === 'V4')) {
+  const srcList = chain.sources.filter((x) => x.ver === 'V3' || x.ver === 'V4'); let si = 0;
+  for (const src0 of srcList) {
+    emit({ type: 'progress', msg: tr(lang, 'liqFind', { src: src0.name }), pct: Math.round(3 + 27 * si++ / Math.max(1, srcList.length)) });
     let src; try { ({ src } = await resolveSrc(key, src0)); } catch (e) { if (e.fatal) throw e; notes.push(`${src0.name}: ${e.code || e.message}`); continue; }
     let F; try { F = await poolFields(key, src.id); } catch (_) { continue; }
     if (!F.tick.has('liquidityNet') || !F.pool.has('totalValueLockedUSD')) { notes.push(`${src.name}: no ticks`); continue; }
@@ -1057,7 +1076,10 @@ async function liqMap(chainKey, addrRaw, key, priceIn) {
   const seen = new Set(); const top = found.filter((x) => !seen.has(x.p.id) && seen.add(x.p.id)).slice(0, 3);
   let price = Number(priceIn) > 0 ? Number(priceIn) : 0;
   const pools = [];
+  let pi = 0;
   for (const { p, src, fee } of top) {
+    const base = 30 + 70 * pi / top.length, span = 70 / top.length; pi++;
+    emit({ type: 'progress', msg: tr(lang, 'liqTicks', { i: pi, n: top.length, pair: `${p.token0.symbol}/${p.token1.symbol}`, p: 1 }), pct: Math.round(base) });
     const tokenIs0 = p.token0.id.toLowerCase() === addr;
     const d0 = Number(p.token0.decimals) || 0, d1 = Number(p.token1.decimals) || 0;
     const sqrtPriceRaw = p.sqrtPrice && num(p.sqrtPrice) > 0 ? num(p.sqrtPrice) / 2 ** 96 : Math.pow(1.0001, Number(p.tick) / 2);
@@ -1068,6 +1090,7 @@ async function liqMap(chainKey, addrRaw, key, priceIn) {
       catch (e) { if (e.fatal) throw e; break; }
       const list = r.t || []; for (const x of list) ticks.push({ t: Number(x.tickIdx), net: num(x.liquidityNet) });
       if (list.length < 1000) break; after = Number(list[list.length - 1].tickIdx);
+      emit({ type: 'progress', msg: tr(lang, 'liqTicks', { i: pi, n: top.length, pair: `${p.token0.symbol}/${p.token1.symbol}`, p: page + 2 }), pct: Math.round(base + span * Math.min(0.9, (page + 1) / 4)) });
     }
     const other = tokenIs0 ? p.token1 : p.token0; const me = tokenIs0 ? p.token0 : p.token1;
     const z = liqZones({ tokenIs0, d0, d1, sqrtPriceRaw, ticks }, price);
@@ -1085,8 +1108,13 @@ async function handleLiqmap(req, res) {
   if (!isEvmAddr(addr)) return send(400, { error: tr(lang, 'badAddr') });
   if (!CHAINS[chain] || !CHAINS[chain].sources) return send(400, { error: tr(lang, 'liqNoChain') });
   const lim = rateCheck(req, 'token'); if (lim) return send(429, { error: tr(lang, 'lookupLimited', lim) });
-  try { send(200, await liqMap(chain, addr, String(q.get('apiKey') || '').trim() || CONFIG_KEY, q.get('price'))); }
-  catch (e) { send(500, { error: msgOf(e, lang) }); }
+  // resposta em linhas (NDJSON): progresso enquanto lê as pools, depois o resultado
+  res.writeHead(200, { 'content-type': 'application/x-ndjson; charset=utf-8', 'cache-control': 'no-cache' });
+  let closed = false; res.on('close', () => { if (!res.writableFinished) closed = true; });
+  const emit = (o) => { if (closed) throw CANCELLED; res.write(JSON.stringify(o) + '\n'); };
+  try { const d = await liqMap(chain, addr, String(q.get('apiKey') || '').trim() || CONFIG_KEY, q.get('price'), emit, lang); emit({ type: 'result', data: d }); }
+  catch (e) { if (!e.cancelled) try { emit({ type: 'error', msg: msgOf(e, lang) }); } catch (_) {} }
+  try { res.end(); } catch (_) {}
 }
 
 async function addLpBurn(rows, key) {
@@ -1358,6 +1386,7 @@ async function handleToken(req, res) {
     if (!rows.length) return send(404, { error: keys.length === 1 ? tr(lang, 'notFound', { chain: CHAINS[keys[0]].label }) : tr(lang, 'notFoundAny'), warnings: errors });
     await addRisk(rows, lang, null);
     await addLpBurn(rows, key);
+    for (const r of rows) if (!r.hist && r._days) r.hist = compactHist(r._days);
     send(200, { rows, warnings: errors });
   } catch (e) { send(500, { error: msgOf(e, lang) }); } finally { runningScans--; }
 }
@@ -1682,6 +1711,7 @@ async function handleScan(req, res) {
     if ((f.cols.has('risk') || f.cols.has('liq')) && rows.length) await addRisk(rows, f.lang, emit);
     if (f.cols.has('liq') && rows.length) { emit({ type: 'progress', msg: tr(f.lang, 'lpCheck'), pct: 99 }); await addLpBurn(rows, key); }
     sortRows(rows, f);                                    // depois do risco, para se poder ordenar por ele
+    for (const r of rows) if (!r.hist && r._days) r.hist = compactHist(r._days);
     const result = { type: 'result', chains: keys, scanned, truncated, rows };
     // não guarda na cache se a verificação de risco falhou (para a próxima pesquisa voltar a tentar)
     if (cKey && !result.rows.some((r) => r.risk && r.risk.error)) scanCache.set(cKey, { at: Date.now(), result, warns: warnLog });
@@ -1753,6 +1783,11 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/api/scan') return await handleScan(req, res);
     if (req.method === 'POST' && req.url === '/api/token') return await handleToken(req, res);
     if (req.method === 'GET' && req.url.startsWith('/api/liqmap?')) return await handleLiqmap(req, res);
+    if (req.method === 'GET' && (req.url === '/trend.html' || req.url.startsWith('/trend.html?') || req.url === '/trendcore.js')) {
+      const f = req.url.startsWith('/trendcore') ? 'trendcore.js' : 'trend.html';
+      res.writeHead(200, { 'content-type': f.endsWith('.js') ? 'text/javascript; charset=utf-8' : 'text/html; charset=utf-8', 'cache-control': 'no-cache' });
+      return res.end(fs.readFileSync(path.join(__dirname, 'public', f)));
+    }
     if (req.method === 'GET' && (req.url === '/liq.html' || req.url.startsWith('/liq.html?'))) {
       res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
       return res.end(fs.readFileSync(path.join(__dirname, 'public', 'liq.html')));

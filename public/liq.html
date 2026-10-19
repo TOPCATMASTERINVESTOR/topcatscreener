@@ -48,6 +48,15 @@ h1 small{display:block;font:500 13px var(--sans);color:var(--muted);letter-spaci
 .now{display:flex;align-items:center;gap:8px;margin:3px 0;color:var(--blue);font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em}
 .now::before,.now::after{content:"";flex:1;height:0;border-top:1px dashed var(--blue);opacity:.7}
 .state{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:28px;color:var(--muted);text-align:center}
+/* progresso: barra + % + tempo restante (a contar para trás) + passo atual */
+.prog{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin-bottom:16px}
+.ptop{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.ppct{font:700 28px/1 var(--mono)}
+.peta{font:600 14px var(--sans);color:#1fd1b2}
+.pel{font-size:12px;color:var(--muted)}
+.pbar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:2%;background:linear-gradient(90deg,var(--accent),#1fd1b2);transition:width .4s}
+.pmsg{margin-top:10px;font:500 12px var(--mono);color:var(--muted)}
 .notes{color:var(--muted);font-size:12px;margin-top:14px}
 .btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:8px;padding:8px 12px;font:600 13px var(--sans)}
 .btn:hover{text-decoration:none;border-color:#2c4c78}
@@ -61,7 +70,12 @@ h1 small{display:block;font:500 13px var(--sans);color:var(--muted);letter-spaci
   </header>
   <p class="explain" id="explain"></p>
   <div class="legend"><span><i style="background:var(--good)"></i><b id="lgBuy"></b></span><span><i style="background:var(--warn)"></i><b id="lgSell"></b></span></div>
-  <div class="state" id="state"></div>
+  <div class="prog" id="prog" role="status" aria-live="polite">
+    <div class="ptop"><span class="ppct" id="pPct">0%</span><span class="peta" id="pEta"></span><span class="pel" id="pEl"></span></div>
+    <div class="pbar"><i id="pBar"></i></div>
+    <div class="pmsg" id="pMsg"></div>
+  </div>
+  <div class="state" id="state" hidden></div>
   <div class="cards" id="cards"></div>
   <div class="notes" id="notes"></div>
 </div>
@@ -86,7 +100,7 @@ $('title').firstChild.textContent = t('liq_title')+' · '+(sym||'');
 $('back').textContent='← '+t('liq_back');
 $('explain').textContent=t('liq_explain');
 $('lgBuy').textContent=t('liq_buy'); $('lgSell').textContent=t('liq_sell',{sym:sym||'token'});
-$('state').textContent=t('liq_loading');
+
 
 function chartHtml(zones, Z, cur){
   const max=Math.max(...zones,0)||1, tot=zones.reduce((a,b)=>a+b,0)||1;
@@ -105,15 +119,45 @@ function chartHtml(zones, Z, cur){
   return `<div class="chart" role="table">${h}</div>`;
 }
 
+// Progresso: % do servidor + estimativa do tempo restante, que desce de segundo a segundo
+const PR={t0:Date.now(),pct:0,eta:null,at:0,timer:null};
+const fmtDur=s=>{ s=Math.max(0,Math.round(s)); if(s<60) return s+' '+t('u_s'); const m=Math.floor(s/60), r=s%60; return m+' '+t('u_min')+(r?' '+String(r).padStart(2,'0')+' '+t('u_s'):''); };
+function progTick(){
+  const el=(Date.now()-PR.t0)/1000;
+  $('pPct').textContent=Math.round(PR.pct)+'%'; $('pBar').style.width=Math.max(2,PR.pct)+'%';
+  $('pEl').textContent=t('p_elapsed',{t:fmtDur(el)});
+  if(PR.eta==null) $('pEta').textContent=t('p_calc');
+  else { const left=PR.eta-(Date.now()-PR.at)/1000; $('pEta').textContent = left>1 ? t('p_left',{t:fmtDur(left)}) : t('p_almost'); }
+}
+function progSet(pct,msg){
+  pct=Math.max(PR.pct,Math.min(99,pct)); PR.pct=pct; if(msg) $('pMsg').textContent=msg;
+  const el=(Date.now()-PR.t0)/1000;
+  if(pct>=5 && el>=2){ const est=el*(100-pct)/pct; PR.eta = PR.eta==null ? est : PR.eta*0.6+est*0.4; PR.at=Date.now(); }
+  progTick();
+}
+function progDone(){ clearInterval(PR.timer); $('prog').hidden=true; }
+PR.timer=setInterval(progTick,1000); progTick(); $('pMsg').textContent=t('liq_loading');
+async function streamMap(url){
+  const r=await fetch(url);
+  if(!/ndjson/.test(r.headers.get('content-type')||'')){ let d={}; try{ d=await r.json(); }catch(_){} throw new Error(d.error||('HTTP '+r.status)); }
+  const reader=r.body.getReader(), dec=new TextDecoder(); let buf='', out=null;
+  for(;;){ const {done,value}=await reader.read(); if(done) break; buf+=dec.decode(value,{stream:true});
+    let i; while((i=buf.indexOf('\n'))>=0){ const line=buf.slice(0,i); buf=buf.slice(i+1); if(!line.trim()) continue; const m=JSON.parse(line);
+      if(m.type==='progress') progSet(m.pct, m.msg);
+      else if(m.type==='error') throw new Error(m.msg);
+      else if(m.type==='result') out=m.data; } }
+  if(!out) throw new Error('no data');
+  return out;
+}
+
 (async()=>{
   try{
     const qs=new URLSearchParams({chain,address,price:String(p||''),lang:LANG}); const key=store.get('key'); if(key) qs.set('apiKey',key);
-    const r=await fetch('api/liqmap?'+qs.toString()); const d=await r.json();
-    if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+    const d=await streamMap('api/liqmap?'+qs.toString());
+    progDone();
     $('sub').textContent=t('liq_sub',{sym:sym||address, chain:d.chainLabel, p:price(d.price||p)});
     const cur=d.price||p;
-    if(!d.pools.length){ $('state').textContent=t('liq_none'); return; }
-    $('state').hidden=true;
+    if(!d.pools.length){ $('state').hidden=false; $('state').textContent=t('liq_none'); return; }
     let cards='';
     if(d.pools.length>1){
       const comb=d.zones.slice(0,-1).map((_,i)=>d.pools.reduce((a,pl)=>a+(pl.zones[i]||0),0));
@@ -125,7 +169,7 @@ function chartHtml(zones, Z, cur){
     }
     $('cards').innerHTML=cards;
     if(d.notes && d.notes.length) $('notes').textContent=d.notes.join(' · ');
-  }catch(e){ $('state').textContent=t('liq_error',{e:e.message}); }
+  }catch(e){ progDone(); $('state').hidden=false; $('state').textContent=t('liq_error',{e:e.message}); }
 })();
 </script>
 </body>
