@@ -37,9 +37,16 @@ ENV_FILE=/etc/topcatscreener.env
 envget() { [ -f "$ENV_FILE" ] && sed -n "s/^$1=//p" "$ENV_FILE" | head -1 || true; }   # sem o ficheiro (1.ª vez) devolve vazio
 GRAPH_API_KEY="${GRAPH_API_KEY:-$(envget GRAPH_API_KEY)}"
 COINGECKO_API_KEY="${COINGECKO_API_KEY:-$(envget COINGECKO_API_KEY)}"
-umask 077
-printf 'GRAPH_API_KEY=%s\nCOINGECKO_API_KEY=%s\n' "$GRAPH_API_KEY" "$COINGECKO_API_KEY" > "$ENV_FILE"
-chmod 600 "$ENV_FILE"; umask 022
+# Password do site (opcional, protege /, /screener e /swap):  SITE_PASSWORD='…' bash deploy-vps.sh topcatlabs.com
+# Só fica guardada a versão cifrada (bcrypt). Para desligar: SITE_PASSWORD=off bash deploy-vps.sh topcatlabs.com
+SITE_USER="${SITE_USER:-$(envget SITE_USER)}"; SITE_USER="${SITE_USER:-topcat}"
+SITE_PASS_HASH="$(envget SITE_PASS_HASH)"
+save_env() {
+  umask 077
+  printf 'GRAPH_API_KEY=%s\nCOINGECKO_API_KEY=%s\nSITE_USER=%s\nSITE_PASS_HASH=%s\n' "$GRAPH_API_KEY" "$COINGECKO_API_KEY" "$SITE_USER" "$SITE_PASS_HASH" > "$ENV_FILE"
+  chmod 600 "$ENV_FILE"; umask 022
+}
+save_env
 
 echo "==> Pacotes do sistema"
 export DEBIAN_FRONTEND=noninteractive
@@ -72,13 +79,23 @@ echo "==> Página inicial em $WWW"
 mkdir -p "$WWW"
 cp -r "$SRC/site/." "$WWW/"
 
+# Repositório privado: chave de leitura (deploy key) em $SWAP_KEY → clone por SSH
+SWAP_KEY=/root/.ssh/topcatswap_deploy
+if [ -f "$SWAP_KEY" ]; then
+  export GIT_SSH_COMMAND="ssh -i $SWAP_KEY -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+  SWAP_REPO="${SWAP_REPO_SSH:-git@github.com:TOPCATMASTERINVESTOR/topcatswap.git}"
+fi
 echo "==> TopCat Swap a partir de $SWAP_REPO"
 if [ -d "$SWAP_SRC/.git" ]; then
-  git -C "$SWAP_SRC" fetch -q --depth 1 origin
-  git -C "$SWAP_SRC" reset -q --hard FETCH_HEAD
+  git -C "$SWAP_SRC" remote set-url origin "$SWAP_REPO"
+  if git -C "$SWAP_SRC" fetch -q --depth 1 origin; then
+    git -C "$SWAP_SRC" reset -q --hard FETCH_HEAD
+  else
+    echo "!! Não consegui ir buscar o Swap ao GitHub (repositório privado sem chave em $SWAP_KEY?). Fica a versão já instalada."
+  fi
 else
   rm -rf "$SWAP_SRC"
-  git clone -q --depth 1 "$SWAP_REPO" "$SWAP_SRC"
+  git clone -q --depth 1 "$SWAP_REPO" "$SWAP_SRC" || { echo "!! Não consegui clonar o Swap. Se o repositório é privado, cria a chave em $SWAP_KEY (ver README)."; exit 1; }
 fi
 # relay dos bundles deste servidor como predefinição (antes do build, por causa dos hashes de integridade)
 sed -i "s#defaultRelay: \"[^\"]*\"#defaultRelay: \"https://$DOMAIN/swap/relay\"#" "$SWAP_SRC/web-src/config.js"
@@ -143,10 +160,27 @@ PrivateTmp=true
 WantedBy=multi-user.target
 EOF
 
+if [ -n "${SITE_PASSWORD:-}" ]; then
+  if [ "$SITE_PASSWORD" = "off" ]; then SITE_PASS_HASH=""; else SITE_PASS_HASH="$(caddy hash-password --plaintext "$SITE_PASSWORD")"; fi
+  save_env
+fi
+AUTH=""
+if [ -n "$SITE_PASS_HASH" ]; then
+  # o relay do Swap fica de fora (só aceita pedidos do próprio site)
+  AUTH="	@locked not path /swap/relay*
+	basicauth @locked {
+		$SITE_USER $SITE_PASS_HASH
+	}"
+  echo "==> Site protegido por password (utilizador: $SITE_USER)"
+else
+  echo "==> Site aberto ao público (sem password)"
+fi
+
 echo "==> Caddy: https://$DOMAIN  (e www.$DOMAIN)"
 cat > /etc/caddy/Caddyfile <<EOF
 $DOMAIN, www.$DOMAIN {
 	encode gzip zstd
+$AUTH
 	handle /screener* {
 		reverse_proxy 127.0.0.1:$PORT
 	}

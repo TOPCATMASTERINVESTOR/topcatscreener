@@ -130,6 +130,16 @@ O `deploy-vps.sh` publica tudo no mesmo domínio:
 
 Cada vez que corres o script, o Swap é atualizado para a versão mais recente do GitHub.
 
+**Password para o site inteiro** (/, /screener e /swap; o relay fica de fora): `SITE_PASSWORD='…' bash deploy-vps.sh topcatlabs.com`. O utilizador é `topcat` (muda com `SITE_USER=…`). Só a versão cifrada fica guardada em `/etc/topcatscreener.env` e mantém-se nos deploys seguintes. Para tirar: `SITE_PASSWORD=off bash deploy-vps.sh topcatlabs.com`.
+
+**Repositório do Swap privado:** o VPS precisa de uma chave só de leitura (deploy key). Uma vez, no VPS:
+
+```
+ssh-keygen -t ed25519 -N "" -C topcatlabs-vps -f /root/.ssh/topcatswap_deploy && cat /root/.ssh/topcatswap_deploy.pub
+```
+
+e junta a chave pública em github.com/TOPCATMASTERINVESTOR/topcatswap → Settings → Deploy keys → Add deploy key (sem "Allow write access"). O script passa a usá-la sozinho.
+
 ## GitHub Pages (sem servidor)
 
 O Screener também corre como site estático: **https://topcatmasterinvestor.github.io/topcatscreener/**
